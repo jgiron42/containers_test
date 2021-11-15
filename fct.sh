@@ -97,19 +97,24 @@ isEq () {
 cmp_one () {
 	# 1=path/to/file
 
-	deepdir="deepthought"; logdir="logs"
-	mkdir -p $deepdir $logdir
+	deepdir="deepthought"; logdir="logs"; compiledir="compile_log"
+	mkdir -p $deepdir $logdir $compiledir
 	container=$(echo $1 | cut -d "/" -f 2)
 	file=$(echo $1 | cut -d "/" -f 3)
 	testname=$(echo $file | cut -d "." -f 1)
 	ft_bin="ft.$container.out"; ft_log="$logdir/ft.$testname.$container.log"
 	std_bin="std.$container.out"; std_log="$logdir/std.$testname.$container.log"
-	std_compile_log="std.$testname.$container.compile.log"
+	std_compile_log="$compiledir/std.$testname.$container.compile.log"
+	ft_compile_log="$compiledir/ft.$testname.$container.compile.log"
 
-	compile "$1" "ft"  "$ft_bin" /dev/null;  ft_ret=$?
+	compile "$1" "ft"  "$ft_bin" $ft_compile_log;  ft_ret=$?
 	compile "$1" "std" "$std_bin" $std_compile_log; std_ret=$?
 	same_compilation=$(isEq $ft_ret $std_ret)
 	std_compile=$std_ret
+
+	if [ $ft_ret -eq 0 ]; then
+	    rm -f $ft_compile_log
+	fi
 
 	if [ $std_compile -ne 0 ] && \
 		cat $std_compile_log | grep "$container/common.hpp:1" &>/dev/null; then
