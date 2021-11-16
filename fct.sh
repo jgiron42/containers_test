@@ -112,7 +112,7 @@ cmp_one () {
 	same_compilation=$(isEq $ft_ret $std_ret)
 	std_compile=$std_ret
 
-	if [ $ft_ret -eq 0 ]; then
+	if [ "$ft_ret" -eq "0" -o "$std_ret" -ne "0" ]; then
 	    rm -f $ft_compile_log
 	fi
 
