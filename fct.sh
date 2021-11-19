@@ -79,10 +79,10 @@ compare_output () {
 		return 0
 	fi
 	regex=$(cat <<- EOF
-	\d+c\d+
-	< max_size: \d+
+	[0123456789]+c[0123456789]+
+	< max_size: [0123456789]+
 	---
-	> max_size: \d+
+	> max_size: [0123456789]+
 	EOF
 	)
 
@@ -126,10 +126,10 @@ cmp_one () {
 
 	> $ft_log; > $std_log;
 	if [ $ft_ret -eq 0 ]; then
-		./$ft_bin &>$ft_log; ft_ret=$?
+		$VALGRIND ./$ft_bin &>$ft_log; ft_ret=$?
 	fi
 	if [ $std_ret -eq 0 ]; then
-		./$std_bin &>$std_log; std_ret=$?
+		$VALGRIND ./$std_bin &>$std_log; std_ret=$?
 	fi
 	same_bin=$(isEq $ft_ret $std_ret)
 
@@ -139,7 +139,7 @@ cmp_one () {
 	same_output=$?
 
 	rm -f $ft_bin $std_bin
-	[ -s "$diff_file" ] || rm -f $diff_file $ft_log $std_log &>/dev/null
+	[ -s "$diff_file" -a $same_output -eq "1" ] || rm -f $diff_file $ft_log $std_log &>/dev/null
 
 	printRes "$container/$file" $same_compilation $same_bin $same_output $std_compile
 	rmdir $deepdir $logdir &>/dev/null
